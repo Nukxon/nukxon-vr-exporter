@@ -13,7 +13,7 @@ Built for archviz studios and independent designers who want to ship walkable VR
 - **Exports the scene mesh** as Draco-compressed Y-up glTF
 - **Generates an orthographic floor plan** for the viewer minimap, with a live preview + framing controls
 - **Camera spacing graph** so your coverage reads at a glance (and your starting camera is flagged)
-- **Bundles everything** into a single `.nukxon` package — no code required, works with any render engine (Cycles, EEVEE, V-Ray, …)
+- **Bundles everything** into a single `.nukxon` package — no code required. Renders with **Cycles** for photoreal output (engine-agnostic by design; Cycles is the tested + recommended engine)
 
 ## Requirements
 
