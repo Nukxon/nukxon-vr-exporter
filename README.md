@@ -1,6 +1,6 @@
 # Nukxon VR Exporter
 
-**Showcase your projects, interactively.** Render walkable VR cubemap tours of your Blender scenes and export them as `.nukxon` packages — ready for the [Nukxon](https://nukxon.com) platform, where clients walk through the space you imagined, in any browser.
+**Showcase your projects, interactively.** Render walkable VR cubemap tours of your Blender scenes and export them as `.nukxon` packages, ready for the [Nukxon](https://nukxon.com) platform, where clients walk through the space you imagined, in any browser.
 
 Built for archviz studios and independent designers who want to ship walkable VR tours of a design without writing a single line of code.
 
@@ -13,7 +13,7 @@ Built for archviz studios and independent designers who want to ship walkable VR
 - **Exports the scene mesh** as Draco-compressed Y-up glTF
 - **Generates an orthographic floor plan** for the viewer minimap, with a live preview + framing controls
 - **Camera spacing graph** so your coverage reads at a glance (and your starting camera is flagged)
-- **Bundles everything** into a single `.nukxon` package — no code required. Renders with **Cycles** for photoreal output (engine-agnostic by design; Cycles is the tested + recommended engine)
+- **Bundles everything** into a single `.nukxon` package, no code required. Renders with **Cycles** for photoreal output (engine-agnostic by design; Cycles is the tested and recommended engine)
 
 ## Requirements
 
@@ -31,9 +31,9 @@ Edit → Preferences → Get Extensions → search "Nukxon VR Exporter" → Inst
 ## Quick start
 
 1. Open your scene and find the **Nukxon** panel (View3D → side panel `N` → Nukxon).
-2. **Place Cameras** — click on surfaces to drop VR camera markers.
+2. **Place Cameras**, then click on surfaces to drop VR camera markers.
 3. (Optional) set a starting camera, teleport points, and project links.
-4. Pick your resolution and hit **Export** — you get a `.nukxon` package.
+4. Pick your resolution and hit **Export**, and you get a `.nukxon` package.
 5. Upload it to [nukxon.com](https://nukxon.com) to share a browser-based, walkable tour with your clients.
 
 No account is required to use the exporter.
