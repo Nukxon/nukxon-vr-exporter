@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "nukxon_vr_exporter"
-version = "1.0.0"
+version = "1.0.1"
 name = "Nukxon VR Exporter"
 tagline = "Render VR cubemap tours and export .nukxon packages"
 maintainer = "Nukxon <contact@nukxon.com>"

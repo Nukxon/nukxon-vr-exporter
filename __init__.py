@@ -2,14 +2,14 @@ bl_info = {
     "name": "Nukxon VR Exporter",
     "description": "Render VR cubemap tours and export .nukxon packages",
     "author": "Nukxon, LLC",
-    "version": (1, 0, 0),
+    "version": (1, 0, 1),
     "blender": (4, 2, 0),
     "location": "View3D > Side Panel > Nukxon",
     "support": "COMMUNITY",
     "category": "Import-Export",
 }
 
-addon_version = (1, 0, 0)
+addon_version = (1, 0, 1)
 
 import os
 import json
@@ -92,19 +92,16 @@ class NUKXON_UL_teleport_list(bpy.types.UIList):
     bl_idname = "NUKXON_UL_teleport_list"
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_property, index):
-        if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            row = layout.row(align=True)
-            row.prop(item, "label", text="", emboss=False)
-            # Right column shows the bound NukxonCam name; falls back to an
-            # "Assign camera" prompt when no camera is bound yet.
-            if item.camera:
-                row.label(text=item.camera.name, icon='CAMERA_DATA')
-            else:
-                row.label(text="Assign camera", icon='ERROR')
-
-        elif self.layout_type == 'GRID':
-            layout.alignment = 'CENTER'
-            layout.label(text=item.label)
+        # These lists are only ever drawn in DEFAULT/COMPACT mode via
+        # template_list, so we draw the row unconditionally (no layout_type).
+        row = layout.row(align=True)
+        row.prop(item, "label", text="", emboss=False)
+        # Right column shows the bound NukxonCam name; falls back to an
+        # "Assign camera" prompt when no camera is bound yet.
+        if item.camera:
+            row.label(text=item.camera.name, icon='CAMERA_DATA')
+        else:
+            row.label(text="Assign camera", icon='ERROR')
 
 
 class NUKXON_UL_link_list(bpy.types.UIList):
@@ -114,12 +111,8 @@ class NUKXON_UL_link_list(bpy.types.UIList):
     bl_idname = "NUKXON_UL_link_list"
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_property, index):
-        if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            row = layout.row(align=True)
-            row.prop(item, "name", text="", emboss=False, icon='EMPTY_SINGLE_ARROW')
-        elif self.layout_type == 'GRID':
-            layout.alignment = 'CENTER'
-            layout.label(text=item.name, icon='EMPTY_SINGLE_ARROW')
+        row = layout.row(align=True)
+        row.prop(item, "name", text="", emboss=False, icon='EMPTY_SINGLE_ARROW')
 
     def filter_items(self, context, data, propname):
         objs = getattr(data, propname)
@@ -411,7 +404,6 @@ class NukxonPostData:
     render_engine = ""
     status        = ""  # shown in UI panel
     rendering_active = False  # true while render pipeline is running
-    photographer_handlers = []  # re-enabled after render
 
     # Per-frame accumulation
     pano_filenames = {}
@@ -440,7 +432,6 @@ class NukxonPostData:
         self.camera_positions = {}
         self.status       = ""
         self.rendering_active = False
-        self.photographer_handlers = []
         self.floor_plan_meta = None
 
 
@@ -1016,17 +1007,6 @@ def _deferred_restore():
         return None
 
 
-def _restore_photographer_handlers():
-    """Re-append any Photographer-addon frame_change_post handlers we stripped
-    before the render. Idempotent (guards against double-append). Called from
-    the normal restore path AND the _start_render give-up branch so the other
-    addon's handlers are never lost when our render fails to start."""
-    for h in post_data.photographer_handlers:
-        if h not in bpy.app.handlers.frame_change_post:
-            bpy.app.handlers.frame_change_post.append(h)
-    post_data.photographer_handlers = []
-
-
 def _deferred_restore_inner():
     scene = post_data.scene_ref
     post_data.rendering_active = False
@@ -1076,8 +1056,6 @@ def _deferred_restore_inner():
         post_data.floor_plan_meta = _render_floor_plan(output_path)
         _write_manifests(output_path)
         bpy.app.timers.register(_deferred_package, first_interval=1.0)
-
-    _restore_photographer_handlers()
 
     cam = bpy.data.objects.get("NukxonCamera")
     if cam is not None:
@@ -2050,17 +2028,6 @@ class NUKXON_OT_export(bpy.types.Operator):
         while nukxon_render_complete in bpy.app.handlers.render_complete:
             bpy.app.handlers.render_complete.remove(nukxon_render_complete)
 
-        # Photographer addon's frame_change_post handlers fight ours.
-        _disabled = []
-        for h in list(bpy.app.handlers.frame_change_post):
-            if 'photographer' in str(getattr(h, '__module__', '')).lower():
-                try:
-                    bpy.app.handlers.frame_change_post.remove(h)
-                    _disabled.append(h)
-                except Exception:
-                    pass
-        post_data.photographer_handlers = _disabled
-
         bpy.app.handlers.render_post.append(nukxon_frame_complete)
         bpy.app.handlers.render_complete.append(nukxon_render_complete)
 
@@ -2080,16 +2047,14 @@ class NUKXON_OT_export(bpy.types.Operator):
                     return 0.5
                 # Give up: the render never started, so neither render_complete
                 # nor render_cancel will ever fire — _deferred_restore won't run.
-                # Recover the session ourselves: pull our render handlers, give
-                # the Photographer addon its handlers back, end the progress
-                # widget, and clear state. Skip floor-plan/manifest/package
-                # since no frames were rendered.
+                # Recover the session ourselves: pull our render handlers, end
+                # the progress widget, and clear state. Skip
+                # floor-plan/manifest/package since no frames were rendered.
                 print(f"[Nukxon] Failed to start render: {e}")
                 while nukxon_frame_complete in bpy.app.handlers.render_post:
                     bpy.app.handlers.render_post.remove(nukxon_frame_complete)
                 while nukxon_render_complete in bpy.app.handlers.render_complete:
                     bpy.app.handlers.render_complete.remove(nukxon_render_complete)
-                _restore_photographer_handlers()
                 post_data.rendering_active = False
                 try:
                     bpy.context.window_manager.progress_end()

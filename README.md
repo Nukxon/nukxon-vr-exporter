@@ -38,6 +38,10 @@ Edit → Preferences → Get Extensions → search "Nukxon VR Exporter" → Inst
 
 No account is required to use the exporter.
 
+## Notes
+
+- **Using the [Photographer](https://chocofur.com/photographer) add-on?** Disable its auto-exposure before exporting. Photographer adjusts exposure per frame, which can cause slight brightness differences between the six cubemap faces. The exporter does not modify any other add-on, so set this yourself for consistent panoramas.
+
 ## Support
 
 Found a bug or have a request? [Open an issue](../../issues).
