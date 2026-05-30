@@ -1,0 +1,38 @@
+schema_version = "1.0.0"
+
+id = "nukxon_vr_exporter"
+version = "1.0.0"
+name = "Nukxon VR Exporter"
+tagline = "Render VR cubemap tours and export .nukxon packages"
+maintainer = "Nukxon <contact@nukxon.com>"
+type = "add-on"
+
+website = "https://nukxon.com"
+
+tags = ["Render", "Import-Export"]
+
+blender_version_min = "4.2.0"
+
+license = [
+  "SPDX:GPL-3.0-or-later",
+]
+
+copyright = [
+  "2026 Nukxon, LLC",
+]
+
+[permissions]
+files = "Write .nukxon export bundle to user-chosen output folder"
+
+[build]
+paths_exclude_pattern = [
+  "__pycache__/",
+  ".git/",
+  ".ruff_cache/",
+  "listing_media/",
+  "*.zip",
+  "*.md",
+  "*.blend1",
+  ".DS_Store",
+  "Thumbs.db",
+]
